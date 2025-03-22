@@ -1,0 +1,19 @@
+clean :
+	-rm *.pdf
+	-rm *.synctex.gz
+	-rm *.aux
+	-rm *.log
+	-rm *.dat
+	-rm *.script
+	-rm *.table
+	-rm *.out
+	-rm *.toc
+	-rm *.cpt
+	-rm *.fls
+	-rm *.fdb_latexmk
+	-rm *.bbl
+	-rm *.xsim
+	-rm *.blg
+	-rm *.lof
+	-rm z_temp*
+	-rm -r _minted*

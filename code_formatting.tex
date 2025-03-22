@@ -1,0 +1,145 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEFINE COLORS
+\definecolor{red}{rgb}{0.6,0,0} 
+\definecolor{blue}{rgb}{0,0,0.6}
+\definecolor{green}{rgb}{0,0.8,0}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+
+\definecolor{mypink}{rgb}{0.753,0.000,0.890}
+\definecolor{myblue}{rgb}{0.078,0.000,1.000}
+\definecolor{mybluedark}{rgb}{0.004,0.024,0.525} \definecolor{mygreen}{rgb}{0.000,0.514,0.000}
+\definecolor{myreddark}{rgb}{0.698,0.000,0.008}
+\definecolor{mycyan}{rgb}{0.000,0.506,0.612}
+\definecolor{mybrown}{rgb}{0.494,0.365,0.090}
+
+%%% DISPLAY CODE
+\usepackage{listings}
+\newcommand\pythonstyle{\lstset{
+    language=Python,
+	tabsize=4,
+	basicstyle=\normalsize\sffamily,
+	numberstyle=\color{gray},
+	stringstyle=\color{myreddark},
+    commentstyle=\color{mygreen},
+    % KEYWORDS
+    % main keywords
+	keywordstyle=\normalsize\color{myblue},%\bfseries,
+    % add keywords (main blue)
+    emph={False,None,True,self,TODO},
+    emphstyle={\color{myblue}},
+    % pink emph
+    emph={[2]assert,break,continue,del,elif ,else,except,finally,for,from,global,if,import,in,pass,raise,return,try,while,with,yield},
+    emphstyle={[2]\color{mypink}},%\bfseries,
+    %dark blue emph
+    emph={[3]execfile,reduce,xrange},
+    emphstyle={[3]\color{mybluedark}},
+    % brown emph
+    emph={[4]exec,print,isinstance,zip,enumerate,reversed,len,repr},
+    emphstyle={[4]\color{mybrown}},
+    % cyan emph
+    emph={[5]object,type,list,set,dict,tuple,str,super},
+    emphstyle={[5]\color{mycyan}},
+    % errors (also cyan emph)
+    emph={[6]Exception,NameError,IndexError,SyntaxError,TypeError,ValueError,OverflowError,ZeroDivisionError},
+    emphstyle={[6]\color{mycyan}},
+    % errors (also cyan emph)
+    emph={[7]copy,deepcopy,append,real,imag},
+    emphstyle={[7]\color{black}},
+    % 
+    showstringspaces=false,
+	breaklines=true,
+	numbers=left,
+    frame=tb,
+	xleftmargin=15pt
+}}
+
+\newcommand\javascriptstyle{\lstset{
+	basicstyle=\small\sffamily,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{purple}\ttfamily,
+    stringstyle=\color{red}\ttfamily,
+	numberstyle=\color{gray},
+    keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+    ndkeywords={class, export, boolean, throw, implements, import, this},
+    ndkeywordstyle=\color{darkgray}\bfseries,
+    identifierstyle=\color{black},
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]',
+    morestring=[b]",
+    showstringspaces=false,
+	breaklines=true,
+	numbers=left,
+    frame=tb,
+	xleftmargin=15pt,
+    sensitive=false,
+}}
+
+\newcommand\csharpstyle{\lstset{
+	language=csh,
+	tabsize=4,
+	basicstyle=\small\sffamily,
+	numberstyle=\color{gray},
+	stringstyle=\color{myreddark},
+    commentstyle=\color{mygreen},
+	morecomment=[l]{//}, %use comment-line-style!
+	morecomment=[s]{/*}{*/}, %for multiline comments
+    % KEYWORDS
+	keywordstyle=\normalsize\color{myblue},%\bfseries,
+	morekeywords={ abstract, event, new, struct,
+		as, explicit, null, switch,
+		base, extern, object, this,
+		bool, false, operator, throw,
+		break, finally, out, true,
+		byte, fixed, override, try,
+		case, float, params, typeof,
+		catch, for, private, uint,
+		char, foreach, protected, ulong,
+		checked, goto, public, unchecked,
+		class, if, readonly, unsafe,
+		const, implicit, ref, ushort,
+		continue, in, return, using,
+		decimal, int, sbyte, virtual,
+		default, interface, sealed, volatile,
+		delegate, internal, short, void,
+		do, is, sizeof, while,
+		double, lock, stackalloc,
+		else, long, static,
+		enum, namespace, string},
+	% 
+    showstringspaces=false,
+	breaklines=true,
+	numbers=left,
+    frame=tb,
+	xleftmargin=15pt	
+}}
+
+% Python environment
+\lstnewenvironment{python}[1][]
+{
+	\pythonstyle
+	\lstset{#1}
+}
+{}
+\lstnewenvironment{javascript}[1][]
+{
+	\javascriptstyle
+	\lstset{#1}
+}
+{}
+\lstnewenvironment{csharp}[1][]
+{
+	\csharpstyle
+	\lstset{#1}
+}
+{}
+
+% CODE FOR EXTERNAL FILES
+\newcommand\pythonexternal[2][]{{
+		\pythonstyle
+		\lstinputlisting[#1]{#2}}}
+
+% CODE FOR INLINE
+\newcommand\pythoninline[1]{{\pythonstyle\lstinline!#1!}}
+\newcommand\csharpinline[1]{{\csharpstyle\lstinline!#1!}}
+\newcommand\javascriptinline[1]{{\javascriptstyle\lstinline!#1!}}
