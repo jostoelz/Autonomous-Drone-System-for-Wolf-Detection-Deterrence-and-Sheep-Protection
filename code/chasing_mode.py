@@ -76,9 +76,9 @@ class ChasingMode(object):
         twistMsg.linear.z = vz
         self.velpub.publish(twistMsg)
 
-    if __name__ == '__main__':
-        node = ChasingMode()
-        rate = rospy.Rate(10)  # 10 Hz
-        while not rospy.is_shutdown():
-            node.velocity_calculator()
-            rate.sleep()
+if __name__ == '__main__':
+    node = ChasingMode()
+    rate = rospy.Rate(10)  # 10 Hz
+    while not rospy.is_shutdown():
+        node.velocity_calculator()
+        rate.sleep()
