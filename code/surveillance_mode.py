@@ -15,7 +15,7 @@ class SurveillanceMode(object):
         # Subscribers
         #############
         rospy.Subscriber("/pidrone/state", State, self.current_state_callback, queue_size=1)
-        rospy.Subscriber('/pidrone/range', Range, self.altitude_cb, queue_size=1)
+        rospy.Subscriber('/pidrone/range', Range, self.altitude_callback, queue_size=1)
 
         # initialize the current state
         self.current_state = State()
@@ -27,7 +27,7 @@ class SurveillanceMode(object):
         self.desired_altitude = 1.0
 
         # desired route
-        self.desired_route = [(2.0, 2.0), # dx, dy
+        self.desired_route = [(2.0, 2.0), # dx (forward / backward), dy (right / left)
                               (4.0, 3.0),
                               (6.0, 5.0)]
 
@@ -53,24 +53,23 @@ class SurveillanceMode(object):
         self.current_position.y = pose.position.y
         self.current_position.z = pose.position.z
 
-    def altitude_cb(self, msg):
-            """
-            The altitude of the robot
-            Args:
-                msg:  the message publishing the altitude
+    def altitude_callback(self, msg):
+        """
+        The altitude of the robot
+        Args:
+            msg:  the message publishing the altitude
 
-            """
-            self.altitude = msg.range
+        """
+        self.altitude = msg.range
 
-    def velcocity_calculator(self):
+    def velocity_calculator(self):
         if self.current_target_index >= len(self.desired_route):
             self.current_target_index = 0 # Reset to the first target if all targets are reached
         
-
         target = self.desired_route[self.current_target_index]
         # calculate distance to target
-        dx = target[0] - self.current_position.x
-        dy = target[1] - self.current_position.y
+        dy = target[0] - self.current_position.x # translating forward is y, translating right is x
+        dx = target[1] - self.current_position.y
         dz = self.desired_altitude - self.altitude
         distance = (dx**2 + dy**2) ** 0.5 # Pythagorean theorem
 
@@ -92,4 +91,7 @@ class SurveillanceMode(object):
 
     if __name__ == '__main__':
         node = SurveillanceMode()
-        rospy.spin()
+        rate = rospy.Rate(10)  # 10 Hz
+        while not rospy.is_shutdown():
+            node.velocity_calculator()
+            rate.sleep()
