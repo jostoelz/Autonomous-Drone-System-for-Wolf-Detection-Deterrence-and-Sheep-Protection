@@ -1,12 +1,3 @@
-# preparation
-!git clone https://github.com/DepthAnything/Depth-Anything-V2
-%cd Depth-Anything-V2/metric_depth
-!pip install -r requirements.txt
-
-# downloads the checkpoints and puts them under the checkpoints directory.
-!mkdir -p checkpoints
-!wget -O checkpoints/depth_anything_v2_metric_vkitti_vits.pth "https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-VKITTI-Small/resolve/main/depth_anything_v2_metric_vkitti_vits.pth?download=true"
-
 import cv2
 import torch
 from google.colab import drive
