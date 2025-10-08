@@ -38,9 +38,9 @@ class SurveillanceMode(object):
         self.tolerance = 0.2
 
         # multiplicators for velocities
-        self.kp_x = 0.5
-        self.kp_y = 0.5
-        self.kp_z = 1.0
+        self.kp_x = 0.2 # in s
+        self.kp_y = 0.2
+        self.kp_z = 0.2
 
         # parameter to avoid AttributeError
         self.altitude = 0.0
@@ -87,11 +87,14 @@ class SurveillanceMode(object):
         twistMsg.linear.x = vx
         twistMsg.linear.y = vy
         twistMsg.linear.z = vz
+        twistMsg.angular.x = 0
+        twistMsg.angular.y = 0
+        twistMsg.angular.z = 0
         self.velpub.publish(twistMsg)
 
 if __name__ == '__main__':
     node = SurveillanceMode()
-    rate = rospy.Rate(10)  # 10 Hz
+    rate = rospy.Rate(30)  # in Hz
     while not rospy.is_shutdown():
         node.velocity_calculator()
         rate.sleep()
