@@ -1,0 +1,16 @@
+<launch>
+    <!-- Object Detection -->
+    <node pkg="my_package" type="detect_object.py" name="object_detector" output="screen"/>
+    
+    <!-- Depth Detector -->
+    <node pkg="my_package" type="detect_depth.py" name="depth_detector" output="screen"/>
+    
+    <!-- Chasing Mode -->
+    <node pkg="my_package" type="chasing_mode.py" name="chasing_node" output="screen"/>
+    
+    <!-- State Machine -->
+    <node pkg="my_package" type="state_machine_mode.py" name="state_machine" output="screen"/>
+    
+    <!-- Surveillance Mode -->
+    <node pkg="my_package" type="surveillance_mode.py" name="surveillance_node" output="screen"/>
+</launch>
