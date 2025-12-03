@@ -1,28 +1,22 @@
 from gpiozero import PWMOutputDevice
+from gpiozero.pins.pigpio import PiGPIOFactory
 from time import sleep
 
-# We use PWMOutputDevice because it is more flexible for raw frequencies
-# Pin 17 is the GPIO pin (physical pin 11)
-buzzer = PWMOutputDevice(17)
+# connects to hardware deamon
+factory = PiGPIOFactory()
 
-print("Press CTRL+C to exit")
+buzzer = PWMOutputDevice(24, pin_factory=factory)
 
 try:
+    # half of the time flows current  
+    buzzer.value = 0.5
+    
+    # set frequency to 4 kHz 
+    buzzer.frequency = 4000
+    
+    # infinity loop so that file doesn't stop 
     while True:
-        # 1. Set frequency 
-        buzzer.frequency = 4000
-        
-        # 2. Turn sound on
-        # This means: 50% of the time on, 50% off -> This generates the sound wave.
-        buzzer.value = 0.5
-        
-        sleep(1.0)
-        
-        # 3. Turn sound off (0.0 = 0%)
-        buzzer.value = 0
-        
-        sleep(1.5)
+        sleep(1)
 
 except KeyboardInterrupt:
-    print("Program ended")
     buzzer.off()
