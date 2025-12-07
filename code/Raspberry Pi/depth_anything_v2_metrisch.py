@@ -114,7 +114,7 @@ def run_inference():
     # Remove extension 
     file_name_no_ext = os.path.splitext(base_name)[0]
     # Create new name
-    output_filename = f"{file_name_no_ext}_relativ.jpg"
+    output_filename = f"{file_name_no_ext}_depth.jpg"
     
 if __name__ == "__main__":
     run_inference()
