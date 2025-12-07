@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 import time
+import os
 
 MODEL_PATH = "depth_anything_v2_vitb_dynamic.onnx" 
 IMAGE_PATH = "IMG_3796.JPEG"
@@ -112,8 +113,15 @@ def run_inference():
         cv2.putText(depth_color, label, (POINT_X + 10, POINT_Y), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
-    cv2.imwrite("output_relative.jpg", depth_color)
-    print("Saved output_relative.jpg")
+    # Extract filename from path
+    base_name = os.path.basename(IMAGE_PATH)
+    # Remove extension 
+    file_name_no_ext = os.path.splitext(base_name)[0]
+    # Create new name
+    output_filename = f"{file_name_no_ext}_relativ.jpg"
+
+    cv2.imwrite(output_filename, depth_color)
+    print(f"Saved {output_filename}")
 
 if __name__ == "__main__":
     run_inference()
