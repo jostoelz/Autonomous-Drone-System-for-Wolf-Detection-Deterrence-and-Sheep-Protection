@@ -2,16 +2,17 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 import time
+import os
 
-MODEL_PATH = "depth_anything_v2_vits_518x518.onnx" 
+MODEL_PATH = "depth_anything_v2_vitb_outdoor_dynamic.onnx" 
 IMAGE_PATH = "IMG_3796.JPEG"
 INPUT_SIZE = (518, 518) # Model input size
 
-# Coordinates (on the original image!)
-POINT_X = 780 
-POINT_Y = 1000 
+# Coordinates 
+POINT_X = 780
+POINT_Y = 1000
 
-SCALE_FACTOR = 1.0 # Keep at 1.0 initially, then adjust based on a real measurement.
+SCALE_FACTOR = 1.0 # Keep at 1.0 initially, then adjust based on a real measurement
 
 def letterbox_image(image, size):
     """Resizes image preserving aspect ratio and padding with gray."""
@@ -23,7 +24,7 @@ def letterbox_image(image, size):
 
     image_resized = cv2.resize(image, (nw, nh))
     
-    # Create a gray image (128 is neutral for ImageNet normalization)
+    # Create a gray image 
     new_image = np.full((h, w, 3), 128, dtype=np.uint8)
     
     # Center the image
@@ -50,8 +51,7 @@ def run_inference():
 
     h_orig, w_orig = image.shape[:2]
 
-    # --- 1. Correct Resizing (Letterbox) ---
-    # Prevents distortion that makes objects look thinner (and thus further away)
+    # Prevents distortion that makes objects look thinner thus further away
     image_input_viz, (scale, pad_x, pad_y) = letterbox_image(image, INPUT_SIZE)
     
     # BGR -> RGB
@@ -84,7 +84,7 @@ def run_inference():
     # Resize to original dimensions
     depth_final = cv2.resize(valid_depth, (w_orig, h_orig))
 
-    # --- 3. Apply Calibration ---
+    # Apply Calibration 
     depth_final = depth_final * SCALE_FACTOR
 
     # Check specific point
@@ -109,8 +109,12 @@ def run_inference():
         cv2.putText(depth_color, f"{depth_final[POINT_Y, POINT_X]:.2f}", 
                     (POINT_X + 10, POINT_Y), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
-    cv2.imwrite("output_depth_corrected.jpg", depth_color)
-    print("Saved output_depth_corrected.jpg")
-
+    # Extract filename from path
+    base_name = os.path.basename(IMAGE_PATH)
+    # Remove extension 
+    file_name_no_ext = os.path.splitext(base_name)[0]
+    # Create new name
+    output_filename = f"{file_name_no_ext}_relativ.jpg"
+    
 if __name__ == "__main__":
     run_inference()
