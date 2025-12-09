@@ -1,4 +1,3 @@
-  GNU nano 5.4                                              send_notification.py                                                        
 import requests
 
 TOPIC = "wolf_detection" # name of topic
