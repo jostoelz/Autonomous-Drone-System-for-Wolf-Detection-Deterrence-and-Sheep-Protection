@@ -5,12 +5,12 @@ import time
 import os
 
 MODEL_PATH = "depth_anything_v2_vitb_outdoor_dynamic.onnx" 
-IMAGE_PATH = "IMG_3796.JPEG"
+IMAGE_PATH = "Foto1.jpg"
 INPUT_SIZE = (518, 518) # Model input size
 
-# Coordinates 
-POINT_X = 780
-POINT_Y = 1000
+# Coordinates
+POINT_X = 120
+POINT_Y = 197
 
 SCALE_FACTOR = 1.0 # Keep at 1.0 initially, then adjust based on a real measurement
 
@@ -115,6 +115,8 @@ def run_inference():
     file_name_no_ext = os.path.splitext(base_name)[0]
     # Create new name
     output_filename = f"{file_name_no_ext}_depth.jpg"
+    # Saves the image
+    cv2.imwrite(output_filename, depth_color)
     
 if __name__ == "__main__":
     run_inference()
