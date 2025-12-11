@@ -8,7 +8,7 @@ from hailo_sdk_client import ClientRunner
 model_name = "midas_v2_small"
 onnx_path = "midas_v21_small_256.onnx"
 calib_path = "calib_images"
-chosen_hw_arch = "hailo8l"
+chosen_hw_arch = "hailo8"
 MODEL_H, MODEL_W = 256, 256 
 
 # extract node names from onnx
