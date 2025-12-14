@@ -11,6 +11,7 @@ HEF_PATH = "yolov8s.hef"
 VIDEO_PATH = "Wolf.mp4"
 CONFIG_PATH = "yolo_config.json"
 SO_PATH = "/usr/lib/aarch64-linux-gnu/hailo/tappas/post_processes/libyolo_hailortpp_post.so"
+OUTPUT_PATH = "output_video.mp4"
 
 MODEL_RES = 640
 
@@ -22,10 +23,6 @@ total_start_time = 0    # Timer for the entire duration
 def run_pipeline():
     Gst.init(None)
 
-    if not os.path.exists(HEF_PATH) or not os.path.exists(CONFIG_PATH) or not os.path.exists(SO_PATH):
-        print("Error: Files missing!")
-        return
-
     # --- PIPELINE ---
     pipeline_str = (
         f"filesrc location={VIDEO_PATH} ! "
@@ -35,13 +32,14 @@ def run_pipeline():
         f"video/x-raw, width={MODEL_RES}, height={MODEL_RES}, format=RGB, pixel-aspect-ratio=1/1 ! "
         f"hailonet name=hailo_infer hef-path={HEF_PATH} ! "
         f"hailofilter so-path={SO_PATH} config-path={CONFIG_PATH} qos=false ! "
-        "hailooverlay ! "
-        "videoconvert ! "
-        "fpsdisplaysink video-sink=autovideosink text-overlay=true sync=false"
+        "hailooverlay ! "                 # Zeichnet die Labels
+        "videoconvert ! "                 # Wichtig: Konvertiert RGB in ein Format für den Encoder
+        "x264enc tune=zerolatency speed-preset=ultrafast ! " # Hardware-Encoder des Raspberry Pi
+        "h264parse ! "                    # Parser für den Videostream
+        "mp4mux ! "                       # Container-Format (MP4)
+        f"filesink location={OUTPUT_PATH} sync=false" # Speichern
     )
 
-    print(f"Starting pipeline...")
-    
     try:
         pipeline = Gst.parse_launch(pipeline_str)
     except Exception as e:
@@ -53,8 +51,6 @@ def run_pipeline():
     if hailo_element:
         src_pad = hailo_element.get_static_pad("src")
         src_pad.add_probe(Gst.PadProbeType.BUFFER, fps_probe_callback)
-    else:
-        print("Warning: Could not attach performance probe.")
 
     pipeline.set_state(Gst.State.PLAYING)
 
@@ -84,16 +80,14 @@ def fps_probe_callback(pad, info):
     
     # Update display every 30 frames
     if frame_count % 30 == 0:
-        # 1. Calculate Current FPS (last 30 frames)
+        # Calculate Current FPS (last 30 frames)
         window_duration = current_time - window_start_time
         current_fps = 30 / window_duration if window_duration > 0 else 0
         
-        # 2. Calculate Total Average FPS (since start)
+        # Calculate Total Average FPS (since start)
         total_duration = current_time - total_start_time
         avg_fps = frame_count / total_duration if total_duration > 0 else 0
         avg_latency = (1.0 / avg_fps) * 1000 if avg_fps > 0 else 0
-
-        print(f"Current: {current_fps:.1f} FPS | AVERAGE: {avg_fps:.1f} FPS ({avg_latency:.1f} ms)")
         
         # Reset window timer (but NOT the total timer)
         window_start_time = current_time
@@ -103,7 +97,6 @@ def fps_probe_callback(pad, info):
 def on_message(bus, message, loop):
     mtype = message.type
     if mtype == Gst.MessageType.EOS:
-        print("\n--- Summary ---")
         # Final calculation at the end
         if total_start_time > 0:
             total_duration = time.time() - total_start_time
@@ -120,3 +113,4 @@ def on_message(bus, message, loop):
 
 if __name__ == "__main__":
     run_pipeline()
+
