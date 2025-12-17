@@ -1,4 +1,3 @@
-  GNU nano 7.2                                                                                                                                                                                                 Dockerfile_combined *                                                                                                                                                                                                        
 # base: ros noetic (ubuntu 20.04 / py3.8)
 # acts as bridge between legacy kinetic pi and new hailo chip
 FROM ros:noetic-ros-base
