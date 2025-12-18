@@ -1,135 +1,173 @@
+import rospy
+import cv2
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+import threading
+from sensor_msgs.msg import CompressedImage
+from geometry_msgs.msg import Point
 from hailo_platform import (HEF, VDevice, HailoStreamInterface, InferVStreams, 
                             ConfigureParams, InputVStreamParams, OutputVStreamParams, FormatType)
 
 # --- CONFIGURATION ---
 HEF_FILE = "yolov8s.hef"
-IMAGE_FILE = "Bilder/MiDas/Wolf2.jpg"
-OUTPUT_FILE = "ergebnis.jpg"
+TARGET_CLASS_ID = 2        # ID 2 = Car (Coco standard)
+CONFIDENCE_THRESHOLD = 0.3 # Sensitivity
 
-def letterbox_image(image, target_width, target_height):
+# --- FAST IMAGE PROCESSING ---
+def letterbox_image_cv2(image, target_width, target_height):
     """
-    Resizes image with unchanged aspect ratio using padding.
-    This is necessary because the model expects a specific input size (e.g., 640x640).
+    Resizes image to model input size using OpenCV (C++ acceleration).
+    Much faster than PIL.
     """
-    img_w, img_h = image.size
-    # Calculate the scaling factor to fit the image into the target dimensions
-    scale = min(target_width / img_w, target_height / img_h)
-    new_w = int(img_w * scale)
-    new_h = int(img_h * scale)
+    ih, iw = image.shape[:2]
+    w, h = target_width, target_height
+    scale = min(w / iw, h / ih)
+    nw = int(iw * scale)
+    nh = int(ih * scale)
 
-    # Resize using high-quality Lanczos filtering
-    image = image.resize((new_w, new_h), Image.LANCZOS)
+    # Fast linear interpolation
+    image_resized = cv2.resize(image, (nw, nh), interpolation=cv2.INTER_LINEAR)
+
+    # Create gray background
+    new_image = np.full((h, w, 3), 114, dtype=np.uint8)
+
+    # Paste centered
+    dx = (w - nw) // 2
+    dy = (h - nh) // 2
+    new_image[dy:dy+nh, dx:dx+nw] = image_resized
+
+    return new_image, (scale, dx, dy)
+
+class RealTimeDetector:
+    def __init__(self):
+        self.latest_msg = None
+        self.new_data = False
+        self.lock = threading.Lock() 
+        
+        # Publisher: queue_size=1 ensures we don't send old detections
+        self.pub = rospy.Publisher('/object_detection/target', Point, queue_size=1)
+        
+        # Subscriber: queue_size=3 acts as a small buffer against Wi-Fi jitter.
+        self.subscriber = rospy.Subscriber("/raspicam_node/image/compressed", 
+                                           CompressedImage, self.callback, queue_size=3, buff_size=2**24)
+
+    def callback(self, msg):
+        # Extremely lightweight callback
+        with self.lock:
+            self.latest_msg = msg
+            self.new_data = True
+
+    def get_latest_image(self):
+        msg = None
+        with self.lock:
+            if self.new_data:
+                msg = self.latest_msg
+                self.new_data = False
+        return msg
+
+    def process_loop(self, infer_pipeline, model_w, model_h):
+        """
+        Main Loop. Runs synchronous to the camera input.
+        """
+        frame_count = 0
+        start_time = rospy.get_time()
+
+        while not rospy.is_shutdown():
+            # 1. Get Image
+            msg = self.get_latest_image()
+            
+            if msg is None:
+                # Sleep extremely briefly to yield CPU
+                rospy.sleep(0.001) 
+                continue
+
+            try:
+                # 2. Decode (Numpy -> OpenCV)
+                # This takes ~1ms for 320x240 images
+                np_arr = np.frombuffer(msg.data, np.uint8)
+                image_cv = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+                
+                if image_cv is None: continue
+
+                # OpenCV BGR -> RGB
+                image_rgb = cv2.cvtColor(image_cv, cv2.COLOR_BGR2RGB)
+
+                # 3. Resize / Letterbox
+                # This takes ~1.5ms
+                processed_image, (scale, pad_x, pad_y) = letterbox_image_cv2(image_rgb, model_w, model_h)
+                input_data = np.expand_dims(processed_image, axis=0)
+
+                # 4. AI Inference
+                # This takes ~14ms
+                infer_results = infer_pipeline.infer(input_data)
+                
+                key = list(infer_results.keys())[0]
+                detections = infer_results[key][0]
+
+                # 5. Extract Best Target
+                best_score = -1.0
+                best_det = None
+
+                if len(detections) > TARGET_CLASS_ID:
+                    class_dets = detections[TARGET_CLASS_ID]
+                    for det in class_dets:
+                        ymin, xmin, ymax, xmax, score = det
+                        if score > best_score and score > CONFIDENCE_THRESHOLD:
+                            best_score = score
+                            best_det = (ymin, xmin, ymax, xmax)
+
+                # 6. Publish
+                if best_det:
+                    ymin, xmin, ymax, xmax = best_det
+                    orig_x = (xmin * model_w - pad_x) / scale
+                    orig_y = (ymin * model_h - pad_y) / scale
+                    
+                    h_orig, w_orig = image_cv.shape[:2]
+                    orig_x = max(0, min(orig_x, w_orig))
+                    orig_y = max(0, min(orig_y, h_orig))
+
+                    p = Point()
+                    p.x = float(orig_x)
+                    p.y = float(orig_y)
+                    p.z = 0.0
+                    self.pub.publish(p)
+
+                # 7. FPS Counter (Every 100 frames)
+                frame_count += 1
+                if frame_count % 100 == 0:
+                    curr_time = rospy.get_time()
+                    elapsed = curr_time - start_time
+                    fps = 100 / elapsed
+                    rospy.loginfo(f"Performance: {fps:.1f} FPS (Last 100 frames)")
+                    start_time = curr_time
+                    frame_count = 0
+                
+            except Exception as e:
+                rospy.logerr_throttle(5, f"Error: {e}")
+
+def main():
+    rospy.init_node('hailo_yolo_final', anonymous=True)
+    detector = RealTimeDetector()
     
-    # Create a new gray canvas (114 is the standard padding color for YOLO)
-    new_image = Image.new("RGB", (target_width, target_height), (114, 114, 114))
-    
-    # Center the resized image on the canvas
-    paste_x = (target_width - new_w) // 2
-    paste_y = (target_height - new_h) // 2
-    new_image.paste(image, (paste_x, paste_y))
-
-    # Return the image as a numpy array and the offsets/scale for coordinate reconstruction later
-    return np.array(new_image), (scale, paste_x, paste_y)
-
-def infer():
-    # Load the compiled Hailo model (HEF)
+    # --- HAILO SETUP ---
     hef = HEF(HEF_FILE)
 
-    # Context manager handles the connection to the Hailo-8/8L hardware
     with VDevice() as target:
-        # Standard configuration for PCIe-based Hailo devices
         configure_params = ConfigureParams.create_from_hef(hef, interface=HailoStreamInterface.PCIe)
         network_group = target.configure(hef, configure_params)[0]
         network_group_params = network_group.create_params()
 
-        # Define stream formats: images in as UINT8, detections out as FLOAT32
         input_vstream_params = InputVStreamParams.make(network_group, format_type=FormatType.UINT8)
         output_vstream_params = OutputVStreamParams.make(network_group, format_type=FormatType.FLOAT32)
 
-        # Get the input dimensions the model expects
-        input_vstream_info = hef.get_input_vstream_infos()[0]
-        model_h = input_vstream_info.shape[0]
-        model_w = input_vstream_info.shape[1]
+        input_info = hef.get_input_vstream_infos()[0]
+        model_h, model_w = input_info.shape[0], input_info.shape[1]
 
-        # 1. Load and Preprocess
-        original_image = Image.open(IMAGE_FILE)
-        processed_image, (scale, pad_x, pad_y) = letterbox_image(original_image, model_w, model_h)
-        
-        # Add batch dimension (1, H, W, C)
-        input_data = np.expand_dims(processed_image, axis=0)
-
-        # Start the inference pipeline
         with InferVStreams(network_group, input_vstream_params, output_vstream_params) as infer_pipeline:
             with network_group.activate(network_group_params):
-                infer_results = infer_pipeline.infer(input_data)
-
-                # Setup PIL drawing context
-                draw = ImageDraw.Draw(original_image)
-                
-                # Load a font for labels, fall back to default if not found
-                try:
-                    font = ImageFont.truetype("DejaVuSans.ttf", 20)
-                except:
-                    font = ImageFont.load_default()
-
-                # Get the detection results (usually stored in the first output stream)
-                key = list(infer_results.keys())[0]
-                batch_result = infer_results[key]
-                detections_per_class = batch_result[0]
-                
-                total_detections = 0
-
-                # Iterate through all detected objects across all classes
-                for class_id, class_detections in enumerate(detections_per_class):
-                    num_in_class = len(class_detections)
-                    
-                    if num_in_class > 0:
-                        total_detections += num_in_class
-                        
-                        for i in range(num_in_class):
-                            detection = class_detections[i]
-                            ymin, xmin, ymax, xmax, score = detection
-                            
-                            # --- 1. De-Normalize (Convert percentages back to model pixel values) ---
-                            if xmax <= 1.5 and ymax <= 1.5:
-                                ymin = ymin * model_h
-                                xmin = xmin * model_w
-                                ymax = ymax * model_h
-                                xmax = xmax * model_w
-                            
-                            # --- 2. Post-processing (Map model pixels back to original image scale) ---
-                            # Subtract the padding and then divide by the scale factor
-                            x1 = (xmin - pad_x) / scale
-                            y1 = (ymin - pad_y) / scale
-                            x2 = (xmax - pad_x) / scale
-                            y2 = (ymax - pad_y) / scale
-
-                            # Clip coordinates to ensure they stay within the image boundaries
-                            x1 = max(0, min(original_image.width, x1))
-                            y1 = max(0, min(original_image.height, y1))
-                            x2 = max(0, min(original_image.width, x2))
-                            y2 = max(0, min(original_image.height, y2))
-
-                            # --- 3. Visualization ---
-                            # Draw the bounding box
-                            draw.rectangle([x1, y1, x2, y2], outline="red", width=5)
-                            
-                            # Label formatting
-                            label_text = f"Class {class_id}: {score:.2f}"
-                            
-                            # Draw a background rectangle for the text to make it readable
-                            text_bbox = draw.textbbox((x1, y1), label_text, font=font)
-                            draw.rectangle(text_bbox, fill="red")
-                            
-                            # Draw the text label
-                            draw.text((x1, y1), label_text, fill="white", font=font)
-
-                # Only save if we actually found something to show
-                if total_detections > 0:
-                    original_image.save(OUTPUT_FILE)
-                    print(f"Done! Saved result to: {OUTPUT_FILE}")
+                detector.process_loop(infer_pipeline, model_w, model_h)
 
 if __name__ == "__main__":
-    infer()
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass
