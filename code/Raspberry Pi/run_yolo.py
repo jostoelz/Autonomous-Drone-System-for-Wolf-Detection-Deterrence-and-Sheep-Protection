@@ -118,9 +118,16 @@ class RealTimeDetector:
                 # 6. Publish
                 if best_det:
                     ymin, xmin, ymax, xmax = best_det
-                    orig_x = (xmin * model_w - pad_x) / scale
-                    orig_y = (ymin * model_h - pad_y) / scale
                     
+                    # Calculate center in normalized model coordinates
+                    center_x_norm = (xmin + xmax) / 2.0
+                    center_y_norm = (ymin + ymax) / 2.0
+
+                    # Convert back to original image pixels (reversing letterbox)
+                    orig_x = (center_x_norm * model_w - pad_x) / scale
+                    orig_y = (center_y_norm * model_h - pad_y) / scale
+                    
+                    # Clip coordinates to image boundaries
                     h_orig, w_orig = image_cv.shape[:2]
                     orig_x = max(0, min(orig_x, w_orig))
                     orig_y = max(0, min(orig_y, h_orig))
@@ -128,7 +135,7 @@ class RealTimeDetector:
                     p = Point()
                     p.x = float(orig_x)
                     p.y = float(orig_y)
-                    p.z = 0.0
+                    p.z = 0.0 # Height/Width could be stored here if needed
                     self.pub.publish(p)
 
                 # 7. FPS Counter (Every 100 frames)
