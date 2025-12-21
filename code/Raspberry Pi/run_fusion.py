@@ -16,7 +16,6 @@ HEF_MIDAS = "midas_v2_small_hailo8_256_320.hef"
 
 TARGET_CLASS_ID = 2        # ID 2 = Car (COCO dataset standard)
 CONFIDENCE_THRESHOLD = 0.3 # Sensitivity cutoff
-CALIBRATION_FACTOR = 10.0  # Needs manual calibration
 
 class FusionNode:
     def __init__(self):
@@ -47,6 +46,16 @@ class FusionNode:
                 msg = self.latest_msg
                 self.new_data = False
         return msg
+
+    def calculate_real_distance(self, raw_val):
+        # Apply logarithmic regression model
+        # Formula: f(x) = -7.576 * ln(x) + 52.205
+        if raw_val <= 0: return 99.9 # Avoid log(0) or negative input
+        
+        dist = -7.576 * np.log(raw_val) + 52.205
+        
+        # Clamp to 0 to avoid negative distance artifacts
+        return max(0.0, float(dist))
 
     def preprocess_yolo(self, image, target_w, target_h):
         # Standard "Letterbox" resizing
@@ -95,7 +104,7 @@ class FusionNode:
                 # STEP 1: YOLO INFERENCE
                 # Performs a "manual context switch" here
                 # Activate -> Infer -> Deactivate (automatically handled by 'with')
-              
+               
                 best_det = None
                 
                 with net_group_yolo.activate(params_yolo):
@@ -168,7 +177,9 @@ class FusionNode:
                             my = max(0, min(my, midas_h - 1))
 
                             raw_val = raw_depth_map[my, mx]
-                            dist_val = CALIBRATION_FACTOR / raw_val if raw_val > 1e-4 else 99.9
+                            
+                            # Apply the logarithmic conversion
+                            dist_val = self.calculate_real_distance(raw_val)
                             
                             self.pub_dist.publish(dist_val)
                 
