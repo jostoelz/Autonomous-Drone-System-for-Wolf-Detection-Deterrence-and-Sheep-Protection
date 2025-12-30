@@ -11,7 +11,7 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode("utf-8")
 
 
-# Path to your image
+# Path to image
 image_path = "Wolf8.png"
 
 # Getting the base64 string
@@ -35,5 +35,6 @@ response = client.chat.completions.create(
         }
     ],
 )
+
 
 print(response.choices[0])
