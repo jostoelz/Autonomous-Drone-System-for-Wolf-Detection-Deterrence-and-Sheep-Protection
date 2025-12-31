@@ -54,7 +54,7 @@ class ChasingVelocity:
        twist.linear.z = max(min(dz * self.kp_z, self.max_vel), -self.max_vel)
        twist.angular.x = 0
        twist.angular.y = 0
-       twist.angular.z = max(min(dy * self.kp_yaw, self.max_yaw_rate), -self.max_yaw_rate)
+       twist.angular.z = max(min(-dy * self.kp_yaw, self.max_yaw_rate), -self.max_yaw_rate)
        return twist
 
     def run(self):
