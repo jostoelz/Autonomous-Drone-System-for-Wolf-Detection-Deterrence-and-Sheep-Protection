@@ -88,7 +88,7 @@ def spawn_colored_ground():
             <material>
               <script>
                 <uri>file://media/materials/scripts/gazebo.material</uri>
-                <name>Gazebo/Blue</name> 
+                <name>Gazebo/White</name> 
               </script>
             </material>
           </visual>
@@ -123,9 +123,6 @@ class SurveillanceVelocity:
 
         # Publishers
         self.vel_pub = rospy.Publisher("/surveillance_velocity", Twist, queue_size=10)
-        
-        # Publisher for the target square visualization
-        self.marker_pub = rospy.Publisher("/visualization_marker", Marker, queue_size=10)
 
         # Subscribers
         rospy.Subscriber("/mavros/state", State, self.state_cb)
@@ -185,38 +182,6 @@ class SurveillanceVelocity:
         self.path_y.append(msg.pose.position.y)
         self.path_z.append(msg.pose.position.z)
         self.time_data.append(rospy.Time.now().to_sec() - self.start_time)
-
-    # Function to publish the square trajectory to RViz
-    def publish_target_markers(self):
-        marker = Marker()
-        marker.header.frame_id = "map" # Or "local_origin" depending on setup
-        marker.header.stamp = rospy.Time.now()
-        marker.ns = "target_trajectory"
-        marker.id = 0
-        marker.type = Marker.LINE_STRIP
-        marker.action = Marker.ADD
-        marker.scale.x = 0.1 # Line width
-        marker.color.a = 1.0 # Alpha (transparency)
-        marker.color.r = 0.0
-        marker.color.g = 1.0 # Green color
-        marker.color.b = 0.0
-        
-        # Add points to the line strip (The Square)
-        for p in self.route:
-            pt = Point()
-            pt.x = p[0]
-            pt.y = p[1]
-            pt.z = self.altitude # Draw it at target altitude
-            marker.points.append(pt)
-        
-        # Close the loop (connect last point to first)
-        pt_end = Point()
-        pt_end.x = self.route[0][0]
-        pt_end.y = self.route[0][1]
-        pt_end.z = self.altitude
-        marker.points.append(pt_end)
-
-        self.marker_pub.publish(marker)
 
     def compute_velocity(self):
         now = rospy.Time.now()
@@ -398,10 +363,6 @@ class SurveillanceVelocity:
             while not rospy.is_shutdown():
                 twist = self.compute_velocity()
                 self.vel_pub.publish(twist)
-                
-                # --- Publish Visualization Markers ---
-                self.publish_target_markers()
-                # -------------------------------------
                 
                 rate.sleep()
         except rospy.ROSInterruptException:
