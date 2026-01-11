@@ -16,13 +16,13 @@ sures such as light and sound are installed, reaching volumes of over 105 dB. In
 If you find this project useful for your research, please consider citing it:
 
 ```bibtex
-@thesis{Stoelzle2024,
-  author       = {St{\"o}lzle, Johannes},
-  title        = {Development of an Autonomous Drone System for Wolf Perception, Deterrence, and Livestock Protection },
-  school       = {Kantonsschule Romanshorn},
-  year         = 2026,
-  type         = {Matura Thesis},
-  url          = {[https://github.com/jostoelz/Autonomous-Drone-System-for-Wolf-Detection-Deterrence-and-Sheep-Protection)}
+@thesis{Stoelzle2026Development,
+  author      = {St{\"o}lzle, Johannes},
+  title       = {Development of an Autonomous Drone System for Wolf Perception, Deterrence, and Livestock Protection},
+  institution = {Kantonsschule Romanshorn},
+  year        = {2026},
+  type        = {Matura Thesis},
+  url         = {https://github.com/jostoelz/Autonomous-Drone-System-for-Wolf-Detection-Deterrence-and-Sheep-Protection}
 }
 ```
 
