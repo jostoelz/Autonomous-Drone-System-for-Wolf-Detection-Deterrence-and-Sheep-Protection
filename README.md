@@ -4,6 +4,8 @@
 - Thesis: <https://drive.google.com/drive/folders/1ag495ByeFjiVlfqUUsdaL6ZCu044Agzx>
 - Demonstration Footage: <https://drive.google.com/drive/u/1/folders/1iq1sal4j-2BdYo_iQWTh4zervpIA7H4Y>
 - Project Video: <https://drive.google.com/drive/folders/1frauV_XionrSbwKy0DaJ-vTSHqZqgdBe>
+- GitHub Repository of Wolf Detection AI: <https://github.com/jostoelz/Wolf-Detection-AI>
+- GitHub Repository of Autonomous Drone Charging Station: <https://github.com/jostoelz/Autonomous-Drone-Charging-Station>
 
 ## 🔍 Abstract
 This Matura thesis presents a novel approach to reducing wolf attacks on livestock in Switzerland through the use of autonomously flying drones. As part of this practice-oriented project, a self-trained Artificial Intelligence (AI) model for detecting wolves and livestock is developed, achieving a 17.5-times higher processing speed than ChatGPT and an IoU value of 0.81 compared to ChatGPT’s 0.01. In addition, a depth model is optimized and modified for real-time deployment, reaching a throughput of 42.9 FPS. Several flight modes are designed and implemented, including a surveillance mode that achieves an average relative error of 2.88% during observation. A chasing flight mode is also implemented, enabling the drone to follow a wolf-like object. The flight behavior of the self-assembled Duckiedrone DD24 is improved, and discrepancies between sensor data are detected and addressed. Drone-mounted deterrent mea-
