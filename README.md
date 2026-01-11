@@ -1,50 +1,42 @@
-# Read Me
+# 📘 Development of an Autonomous Drone System for Wolf Perception, Deterrence, and Livestock Protection 
+## 🔗 Online Access
 
-## Allgemeines
+- Thesis: <https://drive.google.com/drive/folders/1ag495ByeFjiVlfqUUsdaL6ZCu044Agzx>
+- Demonstration Footage: <https://drive.google.com/drive/u/1/folders/1iq1sal4j-2BdYo_iQWTh4zervpIA7H4Y>
+- Project Video: <https://drive.google.com/drive/folders/1frauV_XionrSbwKy0DaJ-vTSHqZqgdBe>
 
-Dieses Template kann verwendet werden um selbständige Arbeiten (MA, SA, SLA) an der Kantonsschule Romanshorn zu schreiben.
+## 🔍 Abstract
+This Matura thesis presents a novel approach to reducing wolf attacks on livestock in Switzerland through the use of autonomously flying drones. As part of this practice-oriented project, a self-trained Artificial Intelligence (AI) model for detecting wolves and livestock is developed, achieving a 17.5-times higher processing speed than ChatGPT and an IoU value of 0.81 compared to ChatGPT’s 0.01. In addition, a depth model is optimized and modified for real-time deployment, reaching a throughput of 42.9 FPS. Several flight modes are designed and implemented, including a surveillance mode that achieves an average relative error of 2.88% during observation. A chasing flight mode is also implemented, enabling the drone to follow a wolf-like object. The flight behavior of the self-assembled Duckiedrone DD24 is improved, and discrepancies between sensor data are detected and addressed. Drone-mounted deterrent mea-
+sures such as light and sound are installed, reaching volumes of over 105 dB. In the event of a wolf detection, an emergency alert is sent to the herder’s phone. Furthermore, a self-designed and constructed autonomous drone charging station is presented. By scaling up the developed technology, livestock could be monitored and protected around the clock in the future without the need for manual supervision.
 
-Bei Fragen, Unklarheiten oder falls Fehler gefunden werden, bitte melden bei sca@ksr.ch
+## 📖 Citation
 
-## Arbeiten mit dem Template
+If you find this project useful for your research, please consider citing it:
 
-### LaTeX einrichten
+```bibtex
+@thesis{Stoelzle2024,
+  author       = {St{\"o}lzle, Johannes},
+  title        = {Development of an Autonomous Drone System for Wolf Perception, Deterrence, and Livestock Protection },
+  school       = {Kantonsschule Romanshorn},
+  year         = 2026,
+  type         = {Matura Thesis},
+  url          = {[https://github.com/jostoelz/Autonomous-Drone-System-for-Wolf-Detection-Deterrence-and-Sheep-Protection)}
+}
+```
 
-   1. Zuerst muss **LaTeX installiert** werden:
-      * Windows: https://www.tug.org/texlive/windows.html (klicke aus `install-tl-windows.exe')
-      * Mac https://www.tug.org/mactex/mactex-download.html (klicke auf `MacTeX.pkg.')
-    \end{itemize}
-   1. Es wird empfohlen, mit dem Editor **Visual Studio Code** (kurz VSCode) zu arbeiten: https://code.visualstudio.com
-   1. **LaTeX-Workshop-Extension** für VSCode installieren:
-      1. Extensions-Reiter öffnen
-      1. Nach "LaTeX Workshop" von James Yu suchen ...
-      1. ... und installieren
+## 🧭 Visual Overview
 
-### Erste Schritte mit LaTeX
+<p align="center">
+  <img src="Overview.png" alt="Overview of system development and operational methodology." width="900"/>
+  <br/>
+  <em>Overview of system development and operational methodology.</em>
+</p>
 
-   1. Entzippe den Ordner mit dem Template und verschiebe diesen an einen passenden Speicherort.
-   1. Öffne den Ordner in VSCode:
-      1. VSCode öffnen
-      1. Datei / Ordner öffnen / Ordner auswählen
-   1. Auf der linken Seite sollte nun der Inhalt des ganzen Ordners angezeigt werden.
-   1. Das wichtigste File ist **"main.tex"**. Dieses kannst du passende umbenennen (z.B: "maturaarbeit.tex", "sla.tex" oder ...).
-   1. Öffne nun das File: In dieses schreibst du den Inhalt deiner Arbeit. Nehme Änderungen vor.
-   1. TeX-File **Kompilieren**:
-      * Nun muss das File kompiliert, also in ein PDF umgewandelt, werden.
-      * Dies sollte immer geschehen, wenn du speicherst.
-      * Alternativ kann man auch manuell kompilieren:
-        1. Command palette öffnen: Ctrl + Shift + P (Win), Shift + Command + P (Mac)
-        1. "LaTeX Workshop: Build with recipe"
-        1. "latexmk" oder "pdflatex -> bibtex -> pdflatex x2" (falls Quellen nicht richtig kompiliert werden)
+## 📜 License
 
-### Wichtigste Files im Template
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-   * **main.tex:** Das **Hauptfile**, hier wird $95\%$ der Arbeit erledigt.
-   * **biblio.bib**:
-      * Hier werden alle **Quellen** erfasst.
-      * Achte darauf, dass die Notation genau stimmt.
-      * Oft kann man bei Artikeln oder Büchern den entsprechenden Eintrag aus dem Internet kopieren.
-      * Es gibt gute Programme (sollte direkt mit LaTeX installiert werden), um die Quellen in diesem File zu verwalten.
-   * **commands.tex**: Hier sind einige Kommandos definiert, die es einem erlauben, den Code kürzer zu halten, z.B. \f anstelle \frac um Brüche zu schreiben. Diese können ignoriert, angepasst und erweitert werden.
-   * **code_formatting.tex**: Nur relevant für Arbeiten, in denen Programmiert wird. Hier wird definiert, wie Programmiercode dargestellt werden soll. Aktuell erfasst Programmiersprachen sind: Python, C#, JavaScript. Dieses File kann verändert und für andere Programmiersprachen erweitert werden. Falls du dies machst, bin ich dir dankbar, wenn du mir deine Version zukommenlassen kannst (sca@ksr.ch), damit ich das Template damit erweitern kann.
-   * **makefile**: Erlaubt es einem, im Terminal mit "make clean" alle Files, die beim Kompilieren erstellt werden, wieder zu löschen und nur die ursprünglichen zu behalten.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+---
+✨ Enjoy exploring the thesis materials. 
