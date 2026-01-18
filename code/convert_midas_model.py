@@ -12,18 +12,14 @@ chosen_hw_arch = "hailo8"
 MODEL_H, MODEL_W = 256, 256 
 
 # extract node names from onnx
-print(f"Untersuche {onnx_path}...")
 model = onnx.load(onnx_path)
 start_node = model.graph.input[0].name
 end_node = model.graph.output[0].name
-print(f"-> Gefundener Input-Name: '{start_node}'")
-print(f"-> Gefundener Output-Name: '{end_node}'")
 
 # init runner
 runner = ClientRunner(hw_arch=chosen_hw_arch)
 
 # load onnx
-print("Lade ONNX Modell in Hailo...")
 hn, npz = runner.translate_onnx_model(
     onnx_path,
     model_name,
@@ -33,7 +29,6 @@ hn, npz = runner.translate_onnx_model(
 )
 
 # prepare calibration data
-print("Lade Bilder für Kalibrierung...")
 image_list = []
 if not os.path.exists(calib_path):
     raise FileNotFoundError(f"Ordner {calib_path} fehlt!")
@@ -57,15 +52,13 @@ full_dataset_array = np.concatenate(image_list, axis=0)
 calib_name = "midas_v2_small/input_layer1"
 calib_data = { calib_name: full_dataset_array }
 
-print("Starte Optimierung...")
 runner.optimize(calib_data)
 
 # compile
-print("Kompiliere zu HEF...")
 hef = runner.compile()
 
 output_file = f"{model_name}_{chosen_hw_arch}.hef"
 with open(output_file, "wb") as f:
     f.write(hef)
 
-print(f"ERFOLG! Datei gespeichert als: {output_file}")
+print(f"File stored as: {output_file}")
