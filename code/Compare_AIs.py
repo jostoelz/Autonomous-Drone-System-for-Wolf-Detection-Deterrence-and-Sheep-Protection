@@ -10,7 +10,7 @@ import mimetypes
 
 # --- CONFIGURATION ---
 # Initialize the client.
-client = OpenAI(api_key="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") 
+client = OpenAI(api_key="[your_API_key]") 
 
 MODEL_PATH = "best.pt"
 TEST_DIR = "test"  # This is the root folder containing 'images' and 'labels' subfolders
