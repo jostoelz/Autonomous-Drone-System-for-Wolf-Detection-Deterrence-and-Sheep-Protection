@@ -5,7 +5,7 @@ from std_msgs.msg import Bool
 
 # --- Configuration ---
 TOPIC_NAME = "chasing_mode"
-NTFY_TOPIC = "wolf_detection"  # Your ntfy.sh topic name
+NTFY_TOPIC = "wolf_detection"  # ntfy.sh topic name
 
 # State variable to prevent spamming notifications
 # Only sends one notification when the mode switches to True
@@ -33,7 +33,7 @@ def callback(msg):
     if msg.data: 
         # Only send if we haven't sent it already in this cycle
         if not notification_sent:
-            send_text_message("WARNING: Wolf detected! Check your sheep immediately!")
+            send_text_message("WARNING: Wolf detected! Check your livestock immediately!")
             notification_sent = True
     else:
         # Chasing Mode is OFF (False)
