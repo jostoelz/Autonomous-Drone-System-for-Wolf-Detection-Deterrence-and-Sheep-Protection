@@ -1,7 +1,7 @@
 # 📘 Development of an Autonomous Drone System for Wolf Perception, Deterrence, and Livestock Protection 
 ## 🔗 Online Access
 
-- Thesis: <https://drive.google.com/drive/folders/1ag495ByeFjiVlfqUUsdaL6ZCu044Agzx>
+- Thesis & Presentation: <https://drive.google.com/drive/folders/1ag495ByeFjiVlfqUUsdaL6ZCu044Agzx>
 - Demonstration Footage: <https://drive.google.com/drive/u/1/folders/1iq1sal4j-2BdYo_iQWTh4zervpIA7H4Y>
 - Project Video: <https://drive.google.com/drive/folders/1frauV_XionrSbwKy0DaJ-vTSHqZqgdBe>
 - GitHub Repository of Wolf Detection AI: <https://github.com/jostoelz/Wolf-Detection-AI>
