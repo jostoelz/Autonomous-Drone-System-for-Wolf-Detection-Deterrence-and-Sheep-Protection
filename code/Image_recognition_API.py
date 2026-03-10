@@ -2,7 +2,7 @@ import base64
 from openai import OpenAI
 
 client = OpenAI(
-    api_key="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"
+    api_key="[your_API_key]"
 )
 
 # Function to encode the image
@@ -38,3 +38,4 @@ response = client.chat.completions.create(
 
 
 print(response.choices[0])
+
